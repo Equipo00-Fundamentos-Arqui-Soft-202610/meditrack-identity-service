@@ -34,7 +34,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySQL(connectionString);
 });
 
-// JWT configuration and authentication (CON-04 independent signature validation)
+// JWT authentication
 
 builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -49,10 +49,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 
-// Create the database schema on startup.
-// NOTE: no se generaron migraciones EF todavía. Para pasar a migraciones:
-//   dotnet ef migrations add InitialCreate
-// y reemplazar EnsureCreatedAsync() por MigrateAsync() como en Treatment Service.
+// Create the database schema on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

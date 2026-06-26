@@ -4,12 +4,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MediTrack.IdentityService.API.IAM.Infrastructure.Pipeline.Extensions;
 
-/// <summary>
-/// Configura la autenticación JWT. Conforme a CON-04, cada microservicio valida la
-/// firma del token de forma independiente (defensa en profundidad), sin confiar
-/// ciegamente en el API Gateway. El Identity Service también valida porque expone
-/// endpoints protegidos como GET /api/v1/users/{id}.
-/// </summary>
 public static class AuthenticationServiceCollectionExtensions
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
