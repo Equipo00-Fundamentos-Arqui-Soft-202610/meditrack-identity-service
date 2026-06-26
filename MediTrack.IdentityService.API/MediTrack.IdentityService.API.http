@@ -1,0 +1,36 @@
+@host = http://localhost:5090
+
+### Sign up (Patient)
+POST {{host}}/api/v1/authentication/sign-up
+Content-Type: application/json
+
+{
+  "email": "paciente@meditrack.pe",
+  "password": "Secret123!",
+  "fullName": "Juan Perez",
+  "role": "Patient"
+}
+
+### Sign up (Technical Staff)
+POST {{host}}/api/v1/authentication/sign-up
+Content-Type: application/json
+
+{
+  "email": "tecnico@meditrack.pe",
+  "password": "Secret123!",
+  "fullName": "Maria Lopez",
+  "role": "TechnicalStaff"
+}
+
+### Sign in
+POST {{host}}/api/v1/authentication/sign-in
+Content-Type: application/json
+
+{
+  "email": "paciente@meditrack.pe",
+  "password": "Secret123!"
+}
+
+### Get user profile (requires Bearer token)
+GET {{host}}/api/v1/users/1
+Authorization: Bearer {{token}}
