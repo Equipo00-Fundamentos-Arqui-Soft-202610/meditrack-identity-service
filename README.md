@@ -1,29 +1,21 @@
-# MediTrack — Identity & Profile Service (IAM)
+# MediTrack - Identity & Profile Service
 
-Microservicio de **Identity & Access Management** del sistema MediTrack. Es la
-autoridad de identidad de la plataforma: registra usuarios, autentica credenciales
-y **emite los JSON Web Tokens (JWT)** que el resto de microservicios consume.
+Microservicio de identidad de MediTrack. Registra usuarios, autentica credenciales
+y emite los JSON Web Tokens (JWT) que el resto de servicios consume.
 
-## Rol dentro de la arquitectura
+## Rol en la arquitectura
 
-Según **CON-04** y **AC-01** del informe, la seguridad se reparte en tres capas:
-
-| Responsabilidad | Componente |
-| --------------- | ---------- |
-| **Emitir** el token (sign-up / sign-in) | **Identity Service** (este repo) |
-| **Autorizar por rol** (punto principal) | API Gateway |
-| **Validar la firma** del token de forma independiente | Cada microservicio (defensa en profundidad) |
-
-Este servicio también valida la firma localmente, ya que expone el endpoint
-protegido `GET /api/v1/users/{id}`.
+- Identity Service: emite el token (sign-up / sign-in).
+- API Gateway: valida el token y autoriza por rol.
+- Cada microservicio: valida la firma del token de forma independiente.
 
 ## Stack
 
-- .NET 8 — ASP.NET Core Web API
-- Entity Framework Core 8 + MySQL / TiDB Cloud
-- Arquitectura DDD por bounded context (`IAM`) + CQRS
-- BCrypt para hashing de contraseñas
-- JWT (`System.IdentityModel.Tokens.Jwt`) para emisión y `JwtBearer` para validación
+- .NET 8 (ASP.NET Core Web API)
+- Entity Framework Core 8 + MySQL / TiDB
+- Arquitectura DDD por bounded context (IAM) + CQRS
+- BCrypt para el hash de contraseñas
+- JWT para emisión y validación
 
 ## Endpoints
 
@@ -33,38 +25,20 @@ protegido `GET /api/v1/users/{id}`.
 | POST | `/api/v1/authentication/sign-in` | Anónimo | Autentica credenciales y devuelve su JWT |
 | GET | `/api/v1/users/{id}` | Bearer | Devuelve el perfil del usuario |
 
-### Roles
+Roles disponibles: `Patient` y `TechnicalStaff`.
 
-`Patient` y `TechnicalStaff` (los dos segmentos objetivo del informe). El rol
-viaja como claim dentro del JWT.
+## Configuración JWT
 
-## Configuración JWT (importante)
-
-La sección `Jwt` de `appsettings.json` debe ser **idéntica en todos los
-microservicios** para que la validación de firma compartida funcione:
-
-```json
-"Jwt": {
-  "Issuer": "meditrack-gateway",
-  "Audience": "meditrack-services",
-  "Key": "<misma clave secreta en todos los servicios, mínimo 32 caracteres>",
-  "ExpiresInHours": 8
-}
-```
-
-> ⚠️ La `Key` del repositorio es un placeholder de desarrollo
-> (`CHANGE_ME_...`). En cualquier entorno real debe reemplazarse por un secreto
-> gestionado fuera del control de versiones.
+La sección `Jwt` de `appsettings.json` (Issuer, Audience, Key) debe ser idéntica
+en todos los microservicios para que la validación de firma compartida funcione.
+La clave actual es provisional y debe gestionarse fuera del repositorio antes de
+cualquier despliegue real.
 
 ## Base de datos
 
-El servicio crea el schema al arrancar con `EnsureCreatedAsync()`. Todavía **no
-hay migraciones EF**. Para adoptarlas (como en Treatment Service):
-
-```bash
-dotnet ef migrations add InitialCreate
-# luego cambiar EnsureCreatedAsync() por MigrateAsync() en Program.cs
-```
+El esquema se crea al arrancar con `EnsureCreatedAsync()`. Para adoptar migraciones
+EF: `dotnet ef migrations add InitialCreate` y reemplazar `EnsureCreatedAsync()` por
+`MigrateAsync()` en `Program.cs`.
 
 ## Ejecución local
 
@@ -72,7 +46,7 @@ dotnet ef migrations add InitialCreate
 dotnet run --project MediTrack.IdentityService.API
 ```
 
-Swagger UI: `http://localhost:5090/swagger`. Ejemplos de requests en
+Swagger UI en `http://localhost:5090/swagger`. Ejemplos de requests en
 `MediTrack.IdentityService.API/MediTrack.IdentityService.API.http`.
 
 ## Estructura (bounded context IAM)
