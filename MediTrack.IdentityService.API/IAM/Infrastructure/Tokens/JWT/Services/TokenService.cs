@@ -1,0 +1,44 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using MediTrack.IdentityService.API.IAM.Application.Internal.OutboundServices;
+using MediTrack.IdentityService.API.IAM.Domain.Model.Aggregates;
+using MediTrack.IdentityService.API.IAM.Infrastructure.Tokens.JWT.Configuration;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+
+namespace MediTrack.IdentityService.API.IAM.Infrastructure.Tokens.JWT.Services;
+
+public class TokenService : ITokenService
+{
+    private readonly TokenSettings _settings;
+
+    public TokenService(IOptions<TokenSettings> settings)
+    {
+        _settings = settings.Value;
+    }
+
+    public string GenerateToken(User user)
+    {
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Key));
+        var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim("role", user.Role.ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _settings.Issuer,
+            audience: _settings.Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(_settings.ExpiresInHours),
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+}
