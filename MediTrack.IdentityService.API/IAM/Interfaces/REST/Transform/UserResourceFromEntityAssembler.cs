@@ -12,7 +12,9 @@ public static class UserResourceFromEntityAssembler
             user.Email,
             user.FullName,
             user.Role.ToString(),
-            user.CreatedAt
+            user.CreatedAt,
+            user.Dni,
+            user.DateOfBirth
         );
     }
 }

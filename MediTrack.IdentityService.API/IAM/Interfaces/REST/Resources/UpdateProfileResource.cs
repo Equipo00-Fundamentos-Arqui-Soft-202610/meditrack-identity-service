@@ -2,5 +2,7 @@ namespace MediTrack.IdentityService.API.IAM.Interfaces.REST.Resources;
 
 public record UpdateProfileResource(
     string FullName,
-    string Email
+    string Email,
+    string? Dni = null,
+    DateTime? DateOfBirth = null
 );

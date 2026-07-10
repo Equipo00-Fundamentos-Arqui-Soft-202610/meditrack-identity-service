@@ -5,5 +5,7 @@ public record UserResource(
     string Email,
     string FullName,
     string Role,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? Dni,
+    DateTime? DateOfBirth
 );

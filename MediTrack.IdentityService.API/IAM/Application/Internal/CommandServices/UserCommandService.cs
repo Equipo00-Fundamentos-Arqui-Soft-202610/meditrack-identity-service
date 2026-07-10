@@ -77,8 +77,14 @@ public class UserCommandService : IUserCommandService
             && await _userRepository.ExistsByEmailAsync(command.Email))
             throw new Exception("Email already registered");
 
-        user.UpdateProfile(command.FullName, command.Email);
+        user.UpdateProfile(command.FullName, command.Email, command.Dni, command.DateOfBirth);
         await _userRepository.UpdateAsync(user);
+
+        if (user.Role == UserRole.Patient)
+        {
+            await _eventPublisher.PublishAsync("PerfilActualizado", new PerfilActualizadoEvent(
+                Guid.NewGuid(), DateTime.UtcNow, user.Id, user.FullName, user.Email, user.Dni, user.DateOfBirth));
+        }
 
         return user;
     }
