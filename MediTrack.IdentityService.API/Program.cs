@@ -35,9 +35,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySQL(connectionString);
 });
 
-// JWT authentication
+// JWT authentication -- valores reales vía user-secrets en desarrollo, vía
+// variables de entorno en producción. Nunca en appsettings.json (ver README).
+builder.Services.AddOptions<TokenSettings>()
+    .Bind(builder.Configuration.GetSection("Jwt"))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Key), "Jwt:Key es obligatorio")
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Issuer), "Jwt:Issuer es obligatorio")
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Audience), "Jwt:Audience es obligatorio")
+    .ValidateOnStart();
 
-builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Dependency Injection

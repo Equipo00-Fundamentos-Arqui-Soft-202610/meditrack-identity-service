@@ -29,12 +29,27 @@ Roles disponibles: `Patient` y `TechnicalStaff`.
 
 ## Configuración JWT
 
-La sección `Jwt` de `appsettings.json` (Issuer, Audience, Key) debe ser idéntica
+La sección `Jwt` de `appsettings.json` (Issuer, Audience) debe ser idéntica
 en todos los microservicios para que la validación de firma compartida funcione.
-La clave actual es provisional y debe gestionarse fuera del repositorio antes de
-cualquier despliegue real.
+`Jwt:Key` se deja vacío a propósito -- cada dev lo configura una vez en su máquina:
+
+```bash
+dotnet user-secrets set "Jwt:Key" "<pedile la clave al equipo>" --project MediTrack.IdentityService.API
+```
+
+En producción esa misma variable se setea como `Jwt__Key` en el entorno del
+proveedor de deploy (Render, etc.) -- nunca en un archivo del repo.
 
 ## Base de datos
+
+⚠️ **Acción requerida**: `ConnectionStrings:DefaultConnection` apuntaba a una
+cuenta REAL de TiDB Cloud cuya contraseña estaba commiteada en git. Hay que
+rotar esa contraseña desde la consola de TiDB Cloud (no se puede hacer por
+código) y configurar el connection string nuevo con:
+
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=...;Port=4000;Database=identity_db;User=...;Password=...;SslMode=VerifyFull;" --project MediTrack.IdentityService.API
+```
 
 El esquema se crea al arrancar con `EnsureCreatedAsync()`. Para adoptar migraciones
 EF: `dotnet ef migrations add InitialCreate` y reemplazar `EnsureCreatedAsync()` por
