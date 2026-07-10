@@ -42,6 +42,11 @@ public class AppDbContext : DbContext
                 .HasMaxLength(150)
                 .IsRequired();
 
+            entity.Property(u => u.Dni)
+                .HasMaxLength(20);
+
+            entity.Property(u => u.DateOfBirth);
+
             entity.Property(u => u.Role)
                 .HasConversion<string>()
                 .HasMaxLength(20)
