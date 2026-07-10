@@ -15,7 +15,9 @@ public static class SignUpCommandFromResourceAssembler
             resource.Email,
             resource.Password,
             resource.FullName,
-            role
+            role,
+            resource.Dni,
+            resource.DateOfBirth
         );
     }
 }

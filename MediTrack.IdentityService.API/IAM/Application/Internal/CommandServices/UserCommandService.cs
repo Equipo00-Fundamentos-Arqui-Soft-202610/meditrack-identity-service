@@ -43,14 +43,14 @@ public class UserCommandService : IUserCommandService
             throw new Exception("Email already registered");
 
         var passwordHash = _hashingService.HashPassword(command.Password);
-        var user = new User(command.Email, passwordHash, command.FullName, command.Role);
+        var user = new User(command.Email, passwordHash, command.FullName, command.Role, command.Dni, command.DateOfBirth);
 
         await _userRepository.AddAsync(user);
 
         if (user.Role == UserRole.Patient)
         {
             await _eventPublisher.PublishAsync("PacienteRegistrado", new PacienteRegistradoEvent(
-                Guid.NewGuid(), DateTime.UtcNow, user.Id, user.FullName, user.Email));
+                Guid.NewGuid(), DateTime.UtcNow, user.Id, user.FullName, user.Email, user.Dni, user.DateOfBirth));
         }
 
         var token = _tokenService.GenerateToken(user);

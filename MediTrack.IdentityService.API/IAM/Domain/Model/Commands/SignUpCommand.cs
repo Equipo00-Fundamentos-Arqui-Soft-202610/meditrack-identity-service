@@ -6,5 +6,7 @@ public record SignUpCommand(
     string Email,
     string Password,
     string FullName,
-    UserRole Role
+    UserRole Role,
+    string? Dni = null,
+    DateTime? DateOfBirth = null
 );
