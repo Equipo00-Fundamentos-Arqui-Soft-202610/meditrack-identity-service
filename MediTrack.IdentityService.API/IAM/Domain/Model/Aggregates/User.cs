@@ -31,7 +31,7 @@ public class User
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateProfile(string fullName, string email)
+    public void UpdateProfile(string fullName, string email, string? dni = null, DateTime? dateOfBirth = null)
     {
         if (string.IsNullOrWhiteSpace(fullName))
             throw new Exception("Full name is required");
@@ -41,5 +41,14 @@ public class User
 
         FullName = fullName;
         Email = email;
+
+        // Dni/DateOfBirth rara vez cambian y no siempre vienen en el request
+        // (p. ej. un cliente que solo corrige el nombre) -- omitirlos no debe
+        // borrar el valor ya guardado.
+        if (dni is not null)
+            Dni = dni;
+
+        if (dateOfBirth is not null)
+            DateOfBirth = dateOfBirth;
     }
 }
