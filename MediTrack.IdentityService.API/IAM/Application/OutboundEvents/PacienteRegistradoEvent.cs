@@ -10,5 +10,7 @@ public sealed record PacienteRegistradoEvent(
     DateTime OccurredAtUtc,
     int PatientId,
     string FullName,
-    string Email
+    string Email,
+    string? Dni = null,
+    DateTime? DateOfBirth = null
 );

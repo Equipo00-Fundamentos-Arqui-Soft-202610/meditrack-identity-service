@@ -4,5 +4,7 @@ public record SignUpResource(
     string Email,
     string Password,
     string FullName,
-    string Role
+    string Role,
+    string? Dni = null,
+    DateTime? DateOfBirth = null
 );

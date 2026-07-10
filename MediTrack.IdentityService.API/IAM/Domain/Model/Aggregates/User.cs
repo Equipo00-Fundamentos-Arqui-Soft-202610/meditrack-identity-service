@@ -8,6 +8,8 @@ public class User
     public string Email { get; private set; }
     public string PasswordHash { get; private set; }
     public string FullName { get; private set; }
+    public string? Dni { get; private set; }
+    public DateTime? DateOfBirth { get; private set; }
     public UserRole Role { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
@@ -18,12 +20,14 @@ public class User
         FullName = string.Empty;
     }
 
-    public User(string email, string passwordHash, string fullName, UserRole role)
+    public User(string email, string passwordHash, string fullName, UserRole role, string? dni = null, DateTime? dateOfBirth = null)
     {
         Email = email;
         PasswordHash = passwordHash;
         FullName = fullName;
         Role = role;
+        Dni = dni;
+        DateOfBirth = dateOfBirth;
         CreatedAt = DateTime.UtcNow;
     }
 
