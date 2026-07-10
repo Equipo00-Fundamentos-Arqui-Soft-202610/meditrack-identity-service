@@ -56,16 +56,43 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Messaging (CON-05): publica PacienteRegistrado para que otros bounded contexts
 // mantengan su propia proyección local, sin llamadas síncronas entre servicios.
+// Patrón Outbox: el evento se persiste en la misma base de datos que el cambio
+// de dominio y se entrega a RabbitMQ en background (no se pierde si el broker
+// está caído justo al publicar, ni tumba el sign-up cuando eso pasa).
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
-builder.Services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
+builder.Services.AddScoped<IEventPublisher, OutboxEventPublisher>();
+builder.Services.AddHostedService<OutboxDispatcherHostedService>();
 
 var app = builder.Build();
 
-// Create the database schema on startup
-using (var scope = app.Services.CreateScope())
+// Create/update the database schema on startup.
+//
+// Este servicio no tenía migraciones de EF Core (usaba EnsureCreatedAsync,
+// que solo crea el esquema completo si la base de datos NO existe todavía y
+// no hace nada si ya existe). La base de datos de producción ya existe (con
+// filas reales en `users`), así que EnsureCreatedAsync jamás habría creado la
+// nueva tabla `outbox_message` ahí. Por eso: si la base de datos es nueva
+// (dev/test) se sigue usando EnsureCreatedAsync tal como antes; si ya existe
+// (producción) se aplica la migración aditiva `AddOutboxMessage`, que
+// únicamente crea `outbox_message` y no toca `users`.
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.EnsureCreatedAsync();
+    var databaseAlreadyExists = await db.Database.CanConnectAsync();
+
+    if (!databaseAlreadyExists)
+    {
+        await db.Database.EnsureCreatedAsync();
+    }
+    else
+    {
+        await db.Database.MigrateAsync();
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogCritical(ex, "No se pudo preparar el esquema de base de datos al arrancar.");
 }
 
 // Configure the HTTP request pipeline.
