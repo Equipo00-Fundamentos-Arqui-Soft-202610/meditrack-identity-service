@@ -26,4 +26,16 @@ public class User
         Role = role;
         CreatedAt = DateTime.UtcNow;
     }
+
+    public void UpdateProfile(string fullName, string email)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            throw new Exception("Full name is required");
+
+        if (string.IsNullOrWhiteSpace(email))
+            throw new Exception("Email is required");
+
+        FullName = fullName;
+        Email = email;
+    }
 }
