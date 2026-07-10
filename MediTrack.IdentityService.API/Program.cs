@@ -4,6 +4,7 @@ using MediTrack.IdentityService.API.IAM.Application.Internal.QueryServices;
 using MediTrack.IdentityService.API.IAM.Domain.Repositories;
 using MediTrack.IdentityService.API.IAM.Domain.Services;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Hashing.BCrypt.Services;
+using MediTrack.IdentityService.API.IAM.Infrastructure.Messaging;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Persistence.EFC.Configuration;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Persistence.EFC.Repositories;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Pipeline.Extensions;
@@ -46,6 +47,11 @@ builder.Services.AddScoped<IUserCommandService, UserCommandService>();
 builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 builder.Services.AddScoped<IHashingService, BCryptHashingService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+// Messaging (CON-05): publica PacienteRegistrado para que otros bounded contexts
+// mantengan su propia proyección local, sin llamadas síncronas entre servicios.
+builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
+builder.Services.AddSingleton<IEventPublisher, RabbitMqPublisher>();
 
 var app = builder.Build();
 
