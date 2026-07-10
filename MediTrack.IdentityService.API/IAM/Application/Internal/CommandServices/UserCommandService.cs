@@ -43,7 +43,7 @@ public class UserCommandService : IUserCommandService
             throw new Exception("Email already registered");
 
         var passwordHash = _hashingService.HashPassword(command.Password);
-        var user = new User(command.Email, passwordHash, command.FullName, command.Role, command.Dni, command.DateOfBirth);
+        var user = new User(command.Email, passwordHash, command.FullName, command.Role, command.Dni, command.DateOfBirth, command.Institution);
 
         await _userRepository.AddAsync(user);
 
@@ -73,18 +73,56 @@ public class UserCommandService : IUserCommandService
         var user = await _userRepository.FindByIdAsync(command.UserId)
             ?? throw new Exception("User not found");
 
-        if (!string.Equals(user.Email, command.Email, StringComparison.OrdinalIgnoreCase)
+        if (command.Email is not null
+            && !string.Equals(user.Email, command.Email, StringComparison.OrdinalIgnoreCase)
             && await _userRepository.ExistsByEmailAsync(command.Email))
             throw new Exception("Email already registered");
 
+        var identityChanged = command.FullName is not null || command.Email is not null;
+
         user.UpdateProfile(command.FullName, command.Email, command.Dni, command.DateOfBirth);
+
+        if (command.Institution is not null)
+            user.UpdateInstitution(command.Institution);
+
+        if (command.PhoneNumber is not null)
+            user.UpdatePhoneNumber(command.PhoneNumber);
+
         await _userRepository.UpdateAsync(user);
 
-        if (user.Role == UserRole.Patient)
+        if (user.Role == UserRole.Patient && identityChanged)
         {
             await _eventPublisher.PublishAsync("PerfilActualizado", new PerfilActualizadoEvent(
                 Guid.NewGuid(), DateTime.UtcNow, user.Id, user.FullName, user.Email, user.Dni, user.DateOfBirth));
         }
+
+        return user;
+    }
+
+    public async Task<User> Handle(ChangePasswordCommand command)
+    {
+        var user = await _userRepository.FindByIdAsync(command.UserId)
+            ?? throw new Exception("User not found");
+
+        if (!_hashingService.VerifyPassword(command.CurrentPassword, user.PasswordHash))
+            throw new Exception("La contraseña actual es incorrecta");
+
+        if (string.IsNullOrWhiteSpace(command.NewPassword) || command.NewPassword.Length < 8)
+            throw new Exception("Password must be at least 8 characters long");
+
+        user.UpdatePasswordHash(_hashingService.HashPassword(command.NewPassword));
+        await _userRepository.UpdateAsync(user);
+
+        return user;
+    }
+
+    public async Task<User> Handle(UpdateProfilePhotoCommand command)
+    {
+        var user = await _userRepository.FindByIdAsync(command.UserId)
+            ?? throw new Exception("User not found");
+
+        user.UpdateProfilePhotoUrl(command.ProfilePhotoUrl);
+        await _userRepository.UpdateAsync(user);
 
         return user;
     }

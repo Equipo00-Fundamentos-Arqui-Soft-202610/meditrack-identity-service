@@ -54,6 +54,17 @@ public class AppDbContext : DbContext
 
             entity.Property(u => u.CreatedAt)
                 .IsRequired();
+
+            entity.Property(u => u.Institution)
+                .HasMaxLength(255);
+
+            entity.Property(u => u.PatientId);
+
+            entity.Property(u => u.PhoneNumber)
+                .HasMaxLength(User.MaxPhoneNumberLength);
+
+            entity.Property(u => u.ProfilePhotoUrl)
+                .HasMaxLength(User.MaxProfilePhotoUrlLength);
         });
 
         builder.Entity<OutboxMessage>(entity =>
