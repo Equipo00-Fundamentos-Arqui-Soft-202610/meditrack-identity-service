@@ -8,5 +8,6 @@ public record SignUpCommand(
     string FullName,
     UserRole Role,
     string? Dni = null,
-    DateTime? DateOfBirth = null
+    DateTime? DateOfBirth = null,
+    string? Institution = null
 );

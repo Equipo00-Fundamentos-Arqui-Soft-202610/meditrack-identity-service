@@ -8,6 +8,7 @@ using MediTrack.IdentityService.API.IAM.Infrastructure.Messaging;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Persistence.EFC.Configuration;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Persistence.EFC.Repositories;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Pipeline.Extensions;
+using MediTrack.IdentityService.API.IAM.Infrastructure.Storage;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Tokens.JWT.Configuration;
 using MediTrack.IdentityService.API.IAM.Infrastructure.Tokens.JWT.Services;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,13 @@ builder.Services.AddScoped<IUserCommandService, UserCommandService>();
 builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 builder.Services.AddScoped<IHashingService, BCryptHashingService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+// Compatibilidad con MediTrack-Mobile: foto de perfil en almacenamiento local,
+// en una carpeta privada (no expuesta vía UseStaticFiles). Ruta configurable
+// mediante ProfilePhotos:StoragePath; ver README para consideraciones de
+// persistencia en despliegues sin disco persistente.
+builder.Services.Configure<ProfilePhotoStorageOptions>(builder.Configuration.GetSection(ProfilePhotoStorageOptions.SectionName));
+builder.Services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
 
 // Messaging (CON-05): publica PacienteRegistrado para que otros bounded contexts
 // mantengan su propia proyección local, sin llamadas síncronas entre servicios.
