@@ -5,5 +5,7 @@ public record MobileRegisterRequest(
     string Email,
     string Password,
     string Rol,
-    string? Institucion = null
+    string? Institucion = null,
+    string? Dni = null,
+    DateTime? FechaNacimiento = null
 );

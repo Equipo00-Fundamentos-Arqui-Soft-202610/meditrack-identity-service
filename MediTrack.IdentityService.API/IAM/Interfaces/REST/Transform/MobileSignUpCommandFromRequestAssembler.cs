@@ -14,6 +14,8 @@ public static class MobileSignUpCommandFromRequestAssembler
             request.Password,
             request.Nombre,
             role,
+            Dni: request.Dni,
+            DateOfBirth: request.FechaNacimiento,
             Institution: request.Institucion
         );
     }

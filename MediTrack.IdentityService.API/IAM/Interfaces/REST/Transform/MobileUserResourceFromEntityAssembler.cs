@@ -14,7 +14,9 @@ public static class MobileUserResourceFromEntityAssembler
             MobileRoleMapper.ToMobileRole(user.Role),
             user.Institution,
             user.PhoneNumber,
-            user.ProfilePhotoUrl
+            user.ProfilePhotoUrl,
+            user.Dni,
+            user.DateOfBirth
         );
     }
 }
