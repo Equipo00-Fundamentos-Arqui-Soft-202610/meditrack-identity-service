@@ -7,5 +7,7 @@ public record MobileUserResource(
     string Rol,
     string? Institucion,
     string? PhoneNumber,
-    string? ProfilePhotoUrl
+    string? ProfilePhotoUrl,
+    string? Dni,
+    DateTime? FechaNacimiento
 );

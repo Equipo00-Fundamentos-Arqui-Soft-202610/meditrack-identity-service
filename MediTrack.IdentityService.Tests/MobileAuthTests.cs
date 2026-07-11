@@ -56,6 +56,22 @@ public class MobileAuthTests
     }
 
     [Fact]
+    public async Task Register_ConDniYFechaNacimiento_LosPersisteYDevuelveEnUsuario()
+    {
+        await using var context = TestHarness.NewContext();
+        var controller = new MobileAuthController(TestHarness.BuildCommandService(context));
+
+        var result = await controller.Register(new MobileRegisterRequest(
+            "Ana Paciente", "ana-dni@test.com", "password123", "paciente",
+            Dni: "12345678", FechaNacimiento: new DateTime(1995, 4, 12)));
+
+        var created = Assert.IsType<CreatedResult>(result);
+        var body = Assert.IsType<MobileAuthResponse>(created.Value);
+        Assert.Equal("12345678", body.Usuario.Dni);
+        Assert.Equal(new DateTime(1995, 4, 12), body.Usuario.FechaNacimiento);
+    }
+
+    [Fact]
     public async Task Register_ConEmailDuplicado_DevuelveBadRequest()
     {
         await using var context = TestHarness.NewContext();
