@@ -43,7 +43,8 @@ public class AuthenticationController : ControllerBase
     {
         try
         {
-            var command = SignInCommandFromResourceAssembler.ToCommandFromResource(resource);
+            var clientType = Request.Headers["X-Client-Type"].FirstOrDefault();
+            var command = SignInCommandFromResourceAssembler.ToCommandFromResource(resource, clientType);
 
             var (user, token) = await _userCommandService.Handle(command);
 
@@ -53,7 +54,10 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            var statusCode = ex.Message.Contains("portal es exclusivo")
+                ? StatusCodes.Status403Forbidden
+                : StatusCodes.Status401Unauthorized;
+            return StatusCode(statusCode, new { message = ex.Message });
         }
     }
 }
