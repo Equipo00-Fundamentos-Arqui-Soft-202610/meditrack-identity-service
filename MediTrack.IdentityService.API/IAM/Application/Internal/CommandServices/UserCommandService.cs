@@ -64,6 +64,12 @@ public class UserCommandService : IUserCommandService
         if (user is null || !_hashingService.VerifyPassword(command.Password, user.PasswordHash))
             throw new Exception("Invalid credentials");
 
+        if (string.Equals(command.ClientType, "web", StringComparison.OrdinalIgnoreCase)
+            && user.Role != UserRole.TechnicalStaff)
+        {
+            throw new Exception("Este portal es exclusivo para personal técnico. Los pacientes deben usar la aplicación móvil.");
+        }
+
         var token = _tokenService.GenerateToken(user);
         return (user, token);
     }
