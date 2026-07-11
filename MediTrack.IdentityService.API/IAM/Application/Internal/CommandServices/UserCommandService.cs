@@ -67,7 +67,7 @@ public class UserCommandService : IUserCommandService
         if (string.Equals(command.ClientType, "web", StringComparison.OrdinalIgnoreCase)
             && user.Role != UserRole.TechnicalStaff)
         {
-            throw new Exception("Este portal es exclusivo para personal técnico. Los pacientes deben usar la aplicación móvil.");
+            throw new Exception("Invalid credentials");
         }
 
         var token = _tokenService.GenerateToken(user);
